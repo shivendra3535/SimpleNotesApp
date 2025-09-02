@@ -1,9 +1,12 @@
-FROM openjdk:21
-
+# Stage 1: Build the JAR
+FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-COPY target/SimpleNotesApp-0.0.1-SNAPSHOT.jar /app/SimpleNotesApp-0.0.1-SNAPSHOT.jar
-
+# Stage 2: Run the JAR
+FROM openjdk:21
+WORKDIR /app
+COPY --from=build /app/target/SimpleNotesApp-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "SimpleNotesApp-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
